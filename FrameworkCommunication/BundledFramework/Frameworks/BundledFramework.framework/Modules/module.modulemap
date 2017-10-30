@@ -1,0 +1,11 @@
+framework module BundledFramework {
+  umbrella header "BundledFramework.h"
+
+  export *
+  module * { export * }
+}
+
+module BundledFramework.Swift {
+    header "BundledFramework-Swift.h"
+    requires objc
+}

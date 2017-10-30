@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13196" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="n7v-rW-vwr">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13173"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Blue View Controller-->
+        <scene sceneID="pMe-K7-d2I">
+            <objects>
+                <viewController storyboardIdentifier="BlueViewController" id="n7v-rW-vwr" customClass="BlueViewController" customModule="BundledFramework" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="RR2-BC-SYd">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="Message sent from the Blue view controller" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" clearButtonMode="whileEditing" translatesAutoresizingMaskIntoConstraints="NO" id="LkV-BB-lil">
+                                <rect key="frame" x="16" y="75" width="343" height="30"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="30" id="jHS-hW-p7c"/>
+                                </constraints>
+                                <nil key="textColor"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="9" translatesAutoresizingMaskIntoConstraints="NO" id="c4X-lz-I0Z">
+                                <rect key="frame" x="16" y="46" width="343" height="21"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="21" id="52g-Xn-8Ov"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="blueImage" translatesAutoresizingMaskIntoConstraints="NO" id="zUo-JF-KZd">
+                                <rect key="frame" x="137.5" y="283.5" width="100" height="100"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="100" id="KLK-Ic-YlL"/>
+                                    <constraint firstAttribute="width" constant="100" id="mmf-1p-6Lt"/>
+                                </constraints>
+                            </imageView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="46x-99-gue">
+                                <rect key="frame" x="164" y="131" width="46" height="30"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="30" id="MsR-no-QPF"/>
+                                    <constraint firstAttribute="width" constant="46" id="iv2-h0-FI4"/>
+                                </constraints>
+                                <state key="normal" title="Send"/>
+                                <connections>
+                                    <action selector="send:" destination="n7v-rW-vwr" eventType="touchUpInside" id="Gch-P9-S8O"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="c4X-lz-I0Z" firstAttribute="leading" secondItem="1TV-wQ-KFM" secondAttribute="leading" constant="16" id="3D5-TB-wfs"/>
+                            <constraint firstItem="1TV-wQ-KFM" firstAttribute="trailing" secondItem="LkV-BB-lil" secondAttribute="trailing" constant="16" id="7i0-On-8eq"/>
+                            <constraint firstItem="LkV-BB-lil" firstAttribute="leading" secondItem="1TV-wQ-KFM" secondAttribute="leading" constant="16" id="Vb5-6z-ibC"/>
+                            <constraint firstItem="1TV-wQ-KFM" firstAttribute="trailing" secondItem="c4X-lz-I0Z" secondAttribute="trailing" constant="16" id="WI0-pZ-CD5"/>
+                            <constraint firstItem="LkV-BB-lil" firstAttribute="top" secondItem="c4X-lz-I0Z" secondAttribute="bottom" constant="8" id="Ylo-7g-0dg"/>
+                            <constraint firstItem="zUo-JF-KZd" firstAttribute="centerY" secondItem="RR2-BC-SYd" secondAttribute="centerY" id="Ytj-YE-xwm"/>
+                            <constraint firstItem="zUo-JF-KZd" firstAttribute="centerX" secondItem="RR2-BC-SYd" secondAttribute="centerX" id="hli-VN-yUa"/>
+                            <constraint firstItem="c4X-lz-I0Z" firstAttribute="top" secondItem="1TV-wQ-KFM" secondAttribute="top" constant="26" id="kDR-l4-SeF"/>
+                            <constraint firstItem="46x-99-gue" firstAttribute="top" secondItem="LkV-BB-lil" secondAttribute="bottom" constant="26" id="pJg-Tr-Blh"/>
+                            <constraint firstItem="46x-99-gue" firstAttribute="centerX" secondItem="RR2-BC-SYd" secondAttribute="centerX" id="yoH-bP-q7T"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="1TV-wQ-KFM"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="4EA-gs-Lds"/>
+                    <connections>
+                        <outlet property="colorImageView" destination="zUo-JF-KZd" id="o9G-Yi-lpa"/>
+                        <outlet property="receivedTextLabel" destination="c4X-lz-I0Z" id="3Nz-xG-yJz"/>
+                        <outlet property="sendingTextField" destination="LkV-BB-lil" id="mrc-Oa-3f6"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Hlb-u3-wUK" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-92" y="22.938530734632685"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="blueImage" width="100" height="100"/>
+    </resources>
+</document>
