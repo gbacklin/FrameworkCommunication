@@ -14,6 +14,7 @@ public struct Notifications {
 }
 
 public var viewControllerNames: [String] = ["Red", "Blue"]
+public var test: String = "test"
 
 public class BundledFramework: NSObject {
 

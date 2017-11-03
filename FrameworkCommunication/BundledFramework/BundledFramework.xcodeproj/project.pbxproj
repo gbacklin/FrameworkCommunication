@@ -6,6 +6,20 @@
 	objectVersion = 48;
 	objects = {
 
+/* Begin PBXAggregateTarget section */
+		FBCA9FAF1FAB67C4004F03E6 /* BuildFatFramework */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = FBCA9FB21FAB67C4004F03E6 /* Build configuration list for PBXAggregateTarget "BuildFatFramework" */;
+			buildPhases = (
+				FBCA9FB31FAB67D4004F03E6 /* Build Fat Framework */,
+			);
+			dependencies = (
+			);
+			name = BuildFatFramework;
+			productName = BuildFatFramework;
+		};
+/* End PBXAggregateTarget section */
+
 /* Begin PBXBuildFile section */
 		4E3030E01FA778D30032567F /* BundledFramework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4E3030D61FA778D30032567F /* BundledFramework.framework */; };
 		4E3030E51FA778D40032567F /* BundledFrameworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E3030E41FA778D40032567F /* BundledFrameworkTests.swift */; };
@@ -292,6 +306,10 @@
 						CreatedOnToolsVersion = 9.0.1;
 						ProvisioningStyle = Automatic;
 					};
+					FBCA9FAF1FAB67C4004F03E6 = {
+						CreatedOnToolsVersion = 9.1;
+						ProvisioningStyle = Automatic;
+					};
 				};
 			};
 			buildConfigurationList = 4E3030D01FA778D30032567F /* Build configuration list for PBXProject "BundledFramework" */;
@@ -308,6 +326,7 @@
 			targets = (
 				4E3030D51FA778D30032567F /* BundledFramework */,
 				4E3030DE1FA778D30032567F /* BundledFrameworkTests */,
+				FBCA9FAF1FAB67C4004F03E6 /* BuildFatFramework */,
 			);
 		};
 /* End PBXProject section */
@@ -347,6 +366,20 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "echo \"*** Copying the framework ***\"\n\nPRODUCT_PATH=\"${BUILT_PRODUCTS_DIR}/${PROJECT_NAME}.framework\"\n\nFRAMEWORK_PATH=\"${SRCROOT}/Frameworks\"\nrm -rf \"${FRAMEWORK_PATH}\"\nmkdir \"${FRAMEWORK_PATH}\"\n\ncp -r \"${PRODUCT_PATH}\" \"${FRAMEWORK_PATH}/${PROJECT_NAME}.framework\"";
+		};
+		FBCA9FB31FAB67D4004F03E6 /* Build Fat Framework */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Build Fat Framework";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# xcodebuild -scheme BuildFatFramework -workspace MyFramework.xcworkspace build\n# 1\n# Set bash script to exit immediately if any commands fail.\nset -e\n# 2\n# Setup some constants for use later on.\nFRAMEWORK_NAME=\"${PROJECT}\"\nFRAMEWORK_PATH=\"${SRCROOT}/Frameworks\"\nOUTPUT_DIR=\"${SRCROOT}/build\"\n# 3\n# If remnants from a previous build exist, delete them.\nif [ -d \"${OUTPUT_DIR}\" ]; then\nrm -rf \"${OUTPUT_DIR}\"\nfi\n# 4\n# Build the framework for device and for simulator (using\n# all needed architectures).\nif [ -d \"${FRAMEWORK_NAME}.workspace\" ]; then\nxcodebuild -workspace \"${FRAMEWORK_NAME}.workspace\" -scheme \"${FRAMEWORK_NAME}\" -configuration Release -arch=\"$(ARCHS_STANDARD)\" only_active_arch=no defines_module=yes -sdk \"iphoneos\" -derivedDataPath \"${OUTPUT_DIR}\"\nxcodebuild -workspace \"${FRAMEWORK_NAME}.workspace\" -scheme \"${FRAMEWORK_NAME}\" -configuration Release -arch=\"$(ARCHS_STANDARD)\" only_active_arch=no defines_module=yes -sdk \"iphonesimulator\" -derivedDataPath \"${OUTPUT_DIR}\"\nelse\nif [ -d \"${FRAMEWORK_NAME}.xcodeproj\" ]; then\nxcodebuild -project \"${FRAMEWORK_NAME}.xcodeproj\" -scheme \"${FRAMEWORK_NAME}\" -configuration Release -arch=\"$(ARCHS_STANDARD)\" only_active_arch=no defines_module=yes -sdk \"iphoneos\" -derivedDataPath \"${OUTPUT_DIR}\"\nxcodebuild -project \"${FRAMEWORK_NAME}.xcodeproj\" -scheme \"${FRAMEWORK_NAME}\" -configuration Release -arch=\"$(ARCHS_STANDARD)\" only_active_arch=no defines_module=yes -sdk \"iphonesimulator\" -derivedDataPath \"${OUTPUT_DIR}\"\nfi\nfi\necho \"Creating ${FRAMEWORK_PATH}/${FRAMEWORK_NAME}.framework...\"\n# 5\n# Remove .framework file if exists from previous run.\nif [ -d \"${OUTPUT_DIR}/${FRAMEWORK_NAME}.framework\" ]; then\nrm -rf \"${OUTPUT_DIR}/${FRAMEWORK_NAME}.framework\"\nfi\n# 6\n# Copy the device version of framework.\ncp -r \"${OUTPUT_DIR}/Build/Products/Release-iphoneos/${FRAMEWORK_NAME}.framework\" \"${OUTPUT_DIR}/${FRAMEWORK_NAME}.framework\"\n# 7\n# Replace the framework executable within the framework with\n# a new version created by merging the device and simulator\n# frameworks' executables with lipo.\nlipo -create -output \"${OUTPUT_DIR}/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}\" \"${OUTPUT_DIR}/Build/Products/Release-iphoneos/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}\" \"${OUTPUT_DIR}/Build/Products/Release-iphonesimulator/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}\"\n# 8\n# Copy the Swift module mappings for the simulator into the\n# framework. The device mappings already exist from step 6.\ncp -r \"${OUTPUT_DIR}/Build/Products/Release-iphonesimulator/${FRAMEWORK_NAME}.framework/Modules/${FRAMEWORK_NAME}.swiftmodule/\" \"${OUTPUT_DIR}/${FRAMEWORK_NAME}.framework/Modules/${FRAMEWORK_NAME}.swiftmodule\"\n# 9\n# Copy the Swift _CodeSignature for the simulator into the\n# framework. The _CodeSignature already exist from step 6.\ncp -r \"${OUTPUT_DIR}/Build/Products/Release-iphonesimulator/${FRAMEWORK_NAME}.framework/_CodeSignature\" \"${OUTPUT_DIR}/${FRAMEWORK_NAME}.framework/_CodeSignature\"\n# 10\n# Move framework from the build folder to a Framework folder.\nrm -rf \"${FRAMEWORK_PATH}\"\nmkdir \"${FRAMEWORK_PATH}\"\n\ncp -r \"${OUTPUT_DIR}/${FRAMEWORK_NAME}.framework\" \"${FRAMEWORK_PATH}/${FRAMEWORK_NAME}.framework\"\n# 11\n# Remove .framework file if exists from previous run.\nif [ -d \"${OUTPUT_DIR}\" ]; then\necho \"Cleaning up...\"\nrm -rf \"${OUTPUT_DIR}\"\nfi\necho \"Done\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -566,6 +599,22 @@
 			};
 			name = Release;
 		};
+		FBCA9FB01FAB67C4004F03E6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		FBCA9FB11FAB67C4004F03E6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -592,6 +641,15 @@
 			buildConfigurations = (
 				4E3030EE1FA778D40032567F /* Debug */,
 				4E3030EF1FA778D40032567F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FBCA9FB21FAB67C4004F03E6 /* Build configuration list for PBXAggregateTarget "BuildFatFramework" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FBCA9FB01FAB67C4004F03E6 /* Debug */,
+				FBCA9FB11FAB67C4004F03E6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
