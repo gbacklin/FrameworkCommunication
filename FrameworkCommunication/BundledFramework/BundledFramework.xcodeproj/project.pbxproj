@@ -295,7 +295,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0900;
-				LastUpgradeCheck = 0900;
+				LastUpgradeCheck = 0940;
 				ORGANIZATIONNAME = "Gene Backlin";
 				TargetAttributes = {
 					4E3030D51FA778D30032567F = {
@@ -379,7 +379,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# xcodebuild -scheme BuildFatFramework -workspace MyFramework.xcworkspace build\n# 1\n# Set bash script to exit immediately if any commands fail.\nset -e\n# 2\n# Setup some constants for use later on.\nFRAMEWORK_NAME=\"${PROJECT}\"\nFRAMEWORK_PATH=\"${SRCROOT}/Frameworks\"\nOUTPUT_DIR=\"${SRCROOT}/build\"\n# 3\n# If remnants from a previous build exist, delete them.\nif [ -d \"${OUTPUT_DIR}\" ]; then\nrm -rf \"${OUTPUT_DIR}\"\nfi\n# 4\n# Build the framework for device and for simulator (using\n# all needed architectures).\nif [ -d \"${FRAMEWORK_NAME}.workspace\" ]; then\nxcodebuild -workspace \"${FRAMEWORK_NAME}.workspace\" -scheme \"${FRAMEWORK_NAME}\" -configuration Release -arch=\"$(ARCHS_STANDARD)\" only_active_arch=no defines_module=yes -sdk \"iphoneos\" -derivedDataPath \"${OUTPUT_DIR}\"\nxcodebuild -workspace \"${FRAMEWORK_NAME}.workspace\" -scheme \"${FRAMEWORK_NAME}\" -configuration Release -arch=\"$(ARCHS_STANDARD)\" only_active_arch=no defines_module=yes -sdk \"iphonesimulator\" -derivedDataPath \"${OUTPUT_DIR}\"\nelse\nif [ -d \"${FRAMEWORK_NAME}.xcodeproj\" ]; then\nxcodebuild -project \"${FRAMEWORK_NAME}.xcodeproj\" -scheme \"${FRAMEWORK_NAME}\" -configuration Release -arch=\"$(ARCHS_STANDARD)\" only_active_arch=no defines_module=yes -sdk \"iphoneos\" -derivedDataPath \"${OUTPUT_DIR}\"\nxcodebuild -project \"${FRAMEWORK_NAME}.xcodeproj\" -scheme \"${FRAMEWORK_NAME}\" -configuration Release -arch=\"$(ARCHS_STANDARD)\" only_active_arch=no defines_module=yes -sdk \"iphonesimulator\" -derivedDataPath \"${OUTPUT_DIR}\"\nfi\nfi\necho \"Creating ${FRAMEWORK_PATH}/${FRAMEWORK_NAME}.framework...\"\n# 5\n# Remove .framework file if exists from previous run.\nif [ -d \"${OUTPUT_DIR}/${FRAMEWORK_NAME}.framework\" ]; then\nrm -rf \"${OUTPUT_DIR}/${FRAMEWORK_NAME}.framework\"\nfi\n# 6\n# Copy the device version of framework.\ncp -r \"${OUTPUT_DIR}/Build/Products/Release-iphoneos/${FRAMEWORK_NAME}.framework\" \"${OUTPUT_DIR}/${FRAMEWORK_NAME}.framework\"\n# 7\n# Replace the framework executable within the framework with\n# a new version created by merging the device and simulator\n# frameworks' executables with lipo.\nlipo -create -output \"${OUTPUT_DIR}/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}\" \"${OUTPUT_DIR}/Build/Products/Release-iphoneos/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}\" \"${OUTPUT_DIR}/Build/Products/Release-iphonesimulator/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}\"\n# 8\n# Copy the Swift module mappings for the simulator into the\n# framework. The device mappings already exist from step 6.\ncp -r \"${OUTPUT_DIR}/Build/Products/Release-iphonesimulator/${FRAMEWORK_NAME}.framework/Modules/${FRAMEWORK_NAME}.swiftmodule/\" \"${OUTPUT_DIR}/${FRAMEWORK_NAME}.framework/Modules/${FRAMEWORK_NAME}.swiftmodule\"\n# 9\n# Copy the Swift _CodeSignature for the simulator into the\n# framework. The _CodeSignature already exist from step 6.\ncp -r \"${OUTPUT_DIR}/Build/Products/Release-iphonesimulator/${FRAMEWORK_NAME}.framework/_CodeSignature\" \"${OUTPUT_DIR}/${FRAMEWORK_NAME}.framework/_CodeSignature\"\n# 10\n# Move framework from the build folder to a Framework folder.\nrm -rf \"${FRAMEWORK_PATH}\"\nmkdir \"${FRAMEWORK_PATH}\"\n\ncp -r \"${OUTPUT_DIR}/${FRAMEWORK_NAME}.framework\" \"${FRAMEWORK_PATH}/${FRAMEWORK_NAME}.framework\"\n# 11\n# Remove .framework file if exists from previous run.\nif [ -d \"${OUTPUT_DIR}\" ]; then\necho \"Cleaning up...\"\nrm -rf \"${OUTPUT_DIR}\"\nfi\necho \"Done\"\n";
+			shellScript = "set -e\nexec > /tmp/${PROJECT_NAME}_archive.log 2>&1\n\nif test \"${PLATFORM_NAME}\" = \"watchsimulator\" || test \"${PLATFORM_NAME}\" = \"iphonesimulator\"\nthen\necho \"*** ERROR *** set active scheme for the device not the simulator\"\nopen /tmp/${PROJECT_NAME}_archive.log\nexit 1\nelse\necho \"Begining framework creation for ${PLATFORM_NAME}...\"\n\nif test \"${PLATFORM_NAME}\" = \"watchos\"; then\nDEVICE=\"watchos\"\nSIMULATOR=\"watchsimulator\"\nelse\nDEVICE=\"iphoneos\"\nSIMULATOR=\"iphonesimulator\"\nfi\n\nUNIVERSAL_OUTPUTFOLDER=\"${SRCROOT}/Output\"\nUNIVERSAL_FRAMEWORK_OUTPUT_FOLDER=\"${SRCROOT}/Distribution-Project/Framework-Universal\"\nDEVICE_FRAMEWORK_OUTPUT_FOLDER=\"${SRCROOT}/Framework-Device\"\nSIMULATOR_FRAMEWORK_OUTPUT_FOLDER=\"${SRCROOT}/Framework-Simulator\"\n\nSIMULATOR_DESTINATION_FOLDER=\"${SIMULATOR_FRAMEWORK_OUTPUT_FOLDER}/Build/Products/${CONFIGURATION}-${SIMULATOR}/${PROJECT}.framework\"\n\nDEVICE_BUILD_FRAMEWORK=\"${TARGET_BUILD_DIR}/${FULL_PRODUCT_NAME}\"\n\nif [ \"true\" == ${ALREADYINVOKED:-false} ]\nthen\necho \"RECURSION: Detected, stopping\"\nelse\nexport ALREADYINVOKED=\"true\"\n\necho \"Cleaning work area...\"\n# If remnants from a previous build exist, delete them.\nif [ -d \"${UNIVERSAL_OUTPUTFOLDER}\" ]; then\nrm -rf \"${UNIVERSAL_OUTPUTFOLDER}\"\nfi\nmkdir -p \"${UNIVERSAL_OUTPUTFOLDER}\"\n\nif [ -d \"${SIMULATOR_FRAMEWORK_OUTPUT_FOLDER}\" ]; then\nrm -rf \"${SIMULATOR_FRAMEWORK_OUTPUT_FOLDER}\"\nfi\nmkdir -p \"${SIMULATOR_FRAMEWORK_OUTPUT_FOLDER}\"\n\nif [ -d \"${DEVICE_FRAMEWORK_OUTPUT_FOLDER}\" ]; then\nrm -rf \"${DEVICE_FRAMEWORK_OUTPUT_FOLDER}\"\nfi\nmkdir -p \"${DEVICE_FRAMEWORK_OUTPUT_FOLDER}\"\n\nif [ -d \"${UNIVERSAL_FRAMEWORK_OUTPUT_FOLDER}\" ]; then\nrm -rf \"${UNIVERSAL_FRAMEWORK_OUTPUT_FOLDER}\"\nfi\nmkdir -p \"${UNIVERSAL_FRAMEWORK_OUTPUT_FOLDER}\"\n\necho \"Starting ${CONFIGURATION} build for ${PROJECT}...\"\n\necho \"Building schema ${PROJECT} for the ${SIMULATOR} output ${SIMULATOR_FRAMEWORK_OUTPUT_FOLDER}\"\necho \"Building schema ${PROJECT} for the ${DEVICE} output ${DEVICE_FRAMEWORK_OUTPUT_FOLDER}\"\n\n# Build the framework for simulator (using all needed architectures).\nif [ -d \"${PROJECT}.workspace\" ]; then\nxcodebuild -workspace \"${PROJECT}.workspace\" -scheme \"${PROJECT}\" -configuration \"${CONFIGURATION}\" only_active_arch=no defines_module=yes -sdk \"${DEVICE}\" -derivedDataPath \"${DEVICE_FRAMEWORK_OUTPUT_FOLDER}\" clean build\nxcodebuild -workspace \"${PROJECT}.workspace\" -scheme \"${PROJECT}\" -configuration \"${CONFIGURATION}\" only_active_arch=no defines_module=yes -sdk \"${SIMULATOR}\" -derivedDataPath \"${SIMULATOR_FRAMEWORK_OUTPUT_FOLDER}\" clean build\nelse\nif [ -d \"${PROJECT}.xcodeproj\" ]; then\nxcodebuild -project \"${PROJECT}.xcodeproj\" -scheme \"${PROJECT}\" -configuration \"${CONFIGURATION}\" only_active_arch=no defines_module=yes -sdk \"${DEVICE}\" -derivedDataPath \"${DEVICE_FRAMEWORK_OUTPUT_FOLDER}\" clean build\nxcodebuild -project \"${PROJECT}.xcodeproj\" -scheme \"${PROJECT}\" -configuration \"${CONFIGURATION}\" only_active_arch=no defines_module=yes -sdk \"${SIMULATOR}\" -derivedDataPath \"${SIMULATOR_FRAMEWORK_OUTPUT_FOLDER}\" clean build\nfi\nfi\n\necho \"Copying device framework from ${DEVICE_FRAMEWORK_OUTPUT_FOLDER}/Build/Products/${CONFIGURATION}-${DEVICE}/${PROJECT}.framework to ${UNIVERSAL_FRAMEWORK_OUTPUT_FOLDER}\"\ncp -r \"${DEVICE_FRAMEWORK_OUTPUT_FOLDER}/Build/Products/${CONFIGURATION}-${DEVICE}/${PROJECT}.framework\" \"${UNIVERSAL_FRAMEWORK_OUTPUT_FOLDER}\"\n\necho \"Combining binaries...\"\n\n# Replace the framework executable within the framework with\n# a new version created by merging the device and simulator\n# frameworks' executables with lipo.\nlipo -create -output \"${UNIVERSAL_FRAMEWORK_OUTPUT_FOLDER}/${PROJECT}.framework/${PROJECT}\" \"${UNIVERSAL_FRAMEWORK_OUTPUT_FOLDER}/${PROJECT}.framework/${PROJECT}\" \"${SIMULATOR_DESTINATION_FOLDER}/${PROJECT}\"\n\necho \"Copying module mappings...\"\n\n# Copy the Swift module mappings for the simulator into the\n# framework. The device mappings already exist from step 6.\ncp -r \"${SIMULATOR_DESTINATION_FOLDER}/Modules/${PROJECT}.swiftmodule/\" \"${UNIVERSAL_FRAMEWORK_OUTPUT_FOLDER}/${PROJECT}.framework/Modules/${PROJECT}.swiftmodule\"\n\necho \"Copying code signature...\"\n\n# Copy the Swift _CodeSignature for the simulator into the\n# framework. The _CodeSignature already exist from step 6.\ncp -r \"${SIMULATOR_DESTINATION_FOLDER}/_CodeSignature\" \"${UNIVERSAL_FRAMEWORK_OUTPUT_FOLDER}/${PROJECT}.framework/_CodeSignature\"\n\n# Remove .framework file if exists from previous run.\necho \"Cleaning up...\"\n\nif [ -d \"${UNIVERSAL_OUTPUTFOLDER}\" ]; then\nrm -rf \"${UNIVERSAL_OUTPUTFOLDER}\"\nfi\n\nif [ -d \"${DEVICE_FRAMEWORK_OUTPUT_FOLDER}\" ]; then\nrm -rf \"${DEVICE_FRAMEWORK_OUTPUT_FOLDER}\"\nfi\n\nif [ -d \"${SIMULATOR_FRAMEWORK_OUTPUT_FOLDER}\" ]; then\nrm -rf \"${SIMULATOR_FRAMEWORK_OUTPUT_FOLDER}\"\nfi\n\necho \"Framework created in folder ${UNIVERSAL_FRAMEWORK_OUTPUT_FOLDER}\"\necho \"\"\necho \"*** DONE ***\"\n\n# Convenience to open the framework output folder\nopen \"${UNIVERSAL_FRAMEWORK_OUTPUT_FOLDER}\"\n\n# ALREADYINVOKED if control end\nfi\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -428,6 +428,7 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
@@ -435,6 +436,7 @@
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
@@ -488,6 +490,7 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
@@ -495,6 +498,7 @@
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
@@ -533,14 +537,14 @@
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 8DT5Y3HP4L;
+				DEVELOPMENT_TEAM = "";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = BundledFramework/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.marizack.BundledFramework;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mycompany.BundledFramework;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 4.0;
@@ -554,14 +558,14 @@
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 8DT5Y3HP4L;
+				DEVELOPMENT_TEAM = "";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = BundledFramework/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.marizack.BundledFramework;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mycompany.BundledFramework;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 4.0;
@@ -574,7 +578,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 8DT5Y3HP4L;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = BundledFrameworkTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.marizack.BundledFrameworkTests;
@@ -589,7 +593,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 8DT5Y3HP4L;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = BundledFrameworkTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.marizack.BundledFrameworkTests;
